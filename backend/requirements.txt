@@ -13,6 +13,9 @@ SQLAlchemy>=2.0,<3
 PyMySQL>=1.1,<2
 cryptography>=43            # needed by PyMySQL for MySQL 8 authentication
 
+# Email: root certificates for SSL (python.org Python on macOS has none)
+certifi>=2024.2
+
 # Cloud storage (only used when STORAGE_BACKEND=s3)
 boto3>=1.35,<2
 

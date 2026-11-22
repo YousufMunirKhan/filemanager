@@ -159,11 +159,11 @@ You need **Python 3.11+**, **Node.js 20+** and **MySQL 8** (Laragon or XAMPP is 
 
 `backend/.env` holds passwords and keys, so it is **not** in Git. Without it the app still runs:
 
-- **Sign-in codes:** no email server is set up, so each code is shown on the sign-in screen and printed in the backend window (demo mode). Fill in `SMTP_*` in `backend/.env` to email real codes.
+- **Sign-in codes:** only ever emailed, never shown on screen. Put the `SMTP_*` settings in `backend/.env`; without them sign-up and sign-in stop with "the email server isn't set up". `demo@fileai.test` is not a real inbox: move it to yours with `flask --app run.py change-email demo@fileai.test you@gmail.com`.
 - **AI:** the built-in local analyser. Put `OPENAI_API_KEY=...` in `backend/.env` to use GPT for analysis, folder choice and reading scans/photos.
 - **Database:** created automatically on first start, if MySQL is running.
 
-When the backend starts it prints a short report of what it found — read it first if something doesn't work. Share keys privately (never commit them: this repository is public and OpenAI switches off keys published on GitHub).
+Settings pasted above or below the template lines both count. When the backend starts it prints a short report of what it found — read it first if something doesn't work. Share keys privately (never commit them: this repository is public and OpenAI switches off keys published on GitHub).
 
 ### Manual setup
 

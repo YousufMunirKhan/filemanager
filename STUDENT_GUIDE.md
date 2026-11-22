@@ -184,8 +184,9 @@ npm install
      `demo@fileai.test` is not a real inbox, so once the email server is set up (Part 12) sign in with your own
      email instead. To get the sample files in your own account run, in `backend`:
      `flask --app run.py seed-demo --email you@gmail.com --password "YourPassw0rd!"`.
-     **No email server set up yet** (a fresh copy of the project)? Then the code is shown on the sign-in screen
-     (click **Use it**) and printed in the backend window, so `demo@fileai.test` works straight away.
+     The code is only ever emailed. `demo@fileai.test` is not a real inbox, so move the demo account to your own
+     email once: in `backend` run `.venv/bin/python -m flask --app run.py change-email demo@fileai.test you@gmail.com`
+     (Windows: `.venv\Scripts\python ...`).
 
 **Manual way** (or on macOS) — use two terminals:
 
@@ -282,7 +283,7 @@ Your data stays in MySQL and `backend/uploads/` for next time.
 | Image or scanned PDF shows *"OCR is not installed"* | Tesseract isn't installed | Expected without OCR. Install Tesseract (Part 12), or type the details in yourself and approve |
 | *"Too many failed sign-in attempts"* | Security lockout after 5 wrong passwords | Wait 5 minutes, or restart the backend window |
 | *"Your session has expired"* | Login lasts 30 minutes | Sign in again |
-| Where is my sign-in code? | With an email server it is emailed (check spam too); without one it is shown on the sign-in screen | *"The email server isn't set up"* means `SMTP_HOST` is empty **and** `EMAIL_DEMO_MODE=false` in `backend\.env`: set `EMAIL_DEMO_MODE=true` or see Part 12 |
+| Where is my sign-in code? | It is emailed (check the spam folder too) | *"The email server isn't set up"* means `SMTP_HOST` is empty in `backend\.env`: see Part 12, then restart the backend |
 | *"We couldn't send the verification email"* | The SMTP settings in `backend\.env` are wrong | Check `SMTP_HOST`, `SMTP_USERNAME` and the Gmail **app password**, then run `flask --app run.py send-test-email you@gmail.com` |
 | *"This code has expired"* / *"Too many wrong codes"* | Codes last 10 minutes and allow 5 tries | Click **Resend code** |
 | `Unknown column 'files.deleted_at'` | Database made by v0.1 | Restart the backend (it upgrades the database itself), or run `.venv\Scripts\python -m flask --app run.py init-db` once |
@@ -360,8 +361,7 @@ All of these are switched on in `backend\.env`. **Restart the backend window aft
 3. Check it: `flask --app run.py send-test-email you@gmail.com` (in `backend`, with the venv on).
 4. Restart the backend. Codes are now emailed and are **never shown on screen**.
    To switch two-step verification off completely (not recommended): `TWO_FACTOR_ENABLED=false`.
-   With no email server, `EMAIL_DEMO_MODE=true` (the default) shows the code on screen instead; on a real
-   server set `EMAIL_DEMO_MODE=false` so codes can only be emailed.
+   Demo without any email server only: `EMAIL_DEMO_MODE=true` shows the code on screen instead (off by default).
 
 **OpenAI GPT instead of the built-in AI**
 

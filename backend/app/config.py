@@ -63,10 +63,9 @@ class Config:
     # STARTTLS upgrade after connecting (port 587). Ignored when SMTP_USE_SSL is on.
     SMTP_USE_TLS = _bool("SMTP_USE_TLS", True)
     MAIL_FROM = os.getenv("MAIL_FROM", "") or os.getenv("SMTP_USERNAME", "") or "FileAI <no-reply@fileai.local>"
-    # No email server: show the code on screen (and print it in the backend window) instead of emailing it,
-    # so a fresh copy of the project works without any setup. Has no effect once SMTP_HOST is set.
-    # Set EMAIL_DEMO_MODE=false on a real server, so codes can only ever reach the user's inbox.
-    EMAIL_DEMO_MODE = _bool("EMAIL_DEMO_MODE", True)
+    # Codes are only ever emailed. EMAIL_DEMO_MODE=true (off by default) is only for a demo with no email
+    # server: the code is then shown on screen instead. Has no effect once SMTP_HOST is set.
+    EMAIL_DEMO_MODE = _bool("EMAIL_DEMO_MODE", False)
 
     # ---------- Database ----------
     SQLALCHEMY_DATABASE_URI = os.getenv(

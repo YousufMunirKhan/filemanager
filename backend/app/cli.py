@@ -30,6 +30,33 @@ def register_cli(app: Flask) -> None:
         user, count = seed(email, password)
         click.echo(f"Demo account ready: {user.email} / {password}  ({count} documents added)")
 
+    @app.cli.command("change-email")
+    @click.argument("old")
+    @click.argument("new")
+    def change_email(old: str, new: str):
+        """Move the account OLD to the email address NEW (same password and documents).
+
+        Sign-in codes are emailed, so an account needs a real inbox: e.g.
+        flask --app run.py change-email demo@fileai.test you@gmail.com
+        """
+        from .api.auth import normalise_email, validate_email
+        from .errors import APIError
+        from .models import User
+
+        old, new = normalise_email(old), normalise_email(new)
+        try:
+            validate_email(new)
+        except APIError as error:
+            raise click.ClickException(error.message)
+        user = User.query.filter_by(email=old).first()
+        if user is None:
+            raise click.ClickException(f"There is no account with the email {old}.")
+        if User.query.filter_by(email=new).first():
+            raise click.ClickException(f"{new} already has an account.")
+        user.email = new
+        db.session.commit()
+        click.echo(f"Done. Sign in with {new} and the same password; the code will be emailed there.")
+
     @app.cli.command("send-test-email")
     @click.argument("to")
     def send_test_email(to: str):

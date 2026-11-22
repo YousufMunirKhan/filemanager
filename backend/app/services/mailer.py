@@ -76,6 +76,14 @@ def send_message(message: EmailMessage) -> None:
     """
     cfg = current_app.config
     context = ssl.create_default_context()
+    try:
+        # Python from python.org on macOS has no root certificates until "Install Certificates" is run,
+        # which makes every SSL email fail. certifi (installed with the openai package) has them.
+        import certifi
+
+        context.load_verify_locations(certifi.where())
+    except (ImportError, OSError):
+        pass
     if cfg["SMTP_USE_SSL"]:
         smtp = smtplib.SMTP_SSL(cfg["SMTP_HOST"], cfg["SMTP_PORT"], timeout=20, context=context)
     else:

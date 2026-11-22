@@ -11,12 +11,12 @@ from flask import Flask
 BACKEND_DIR = Path(__file__).resolve().parent.parent
 
 
-def report_rows(app: Flask, settings_file: Path | None) -> list[tuple[str, str]]:
+def report_rows(app: Flask, settings_files: list[Path]) -> list[tuple[str, str]]:
     """(label, text) pairs for the startup report. Also gets the database ready, like the first request would."""
     cfg = app.config
     with app.app_context():
         return [
-            ("Settings file", _settings_status(settings_file)),
+            ("Settings file", _settings_status(settings_files)),
             ("Database", _database_status(app)),
             ("Sign-in codes", _email_status(cfg)),
             ("AI analysis", _ai_status(cfg)),
@@ -24,8 +24,8 @@ def report_rows(app: Flask, settings_file: Path | None) -> list[tuple[str, str]]
         ]
 
 
-def print_report(app: Flask, settings_file: Path | None) -> None:
-    rows = report_rows(app, settings_file)
+def print_report(app: Flask, settings_files: list[Path]) -> None:
+    rows = report_rows(app, settings_files)
     width = max(len(label) for label, _ in rows)
     lines = ["", "=" * 78, " FileAI backend - settings in use"]
     for label, text in rows:
@@ -36,13 +36,16 @@ def print_report(app: Flask, settings_file: Path | None) -> None:
     print("\n".join(lines), flush=True)
 
 
-def _settings_status(settings_file: Path | None) -> str:
-    if settings_file is None:
+def _settings_status(settings_files: list[Path]) -> str:
+    if not settings_files:
         return ("none found, so the defaults are used\n"
                 "-> to change them: copy backend/.env.example to backend/.env and edit it")
-    if settings_file == BACKEND_DIR / ".env":
-        return "backend/.env"
-    return f"{settings_file}\n-> it was read, but please rename/move it to backend/.env"
+    proper = BACKEND_DIR / ".env"
+    names = " + ".join("backend/.env" if path == proper else str(path) for path in settings_files)
+    if settings_files == [proper]:
+        return names
+    advice = "keep only one file, backend/.env" if proper in settings_files else "rename/move it to backend/.env"
+    return f"{names}\n-> all were read, but please {advice}"
 
 
 def _database_status(app: Flask) -> str:
@@ -70,10 +73,10 @@ def _email_status(cfg) -> str:
     if cfg["SMTP_HOST"]:
         return f"emailed through {cfg['SMTP_HOST']}:{cfg['SMTP_PORT']}"
     if cfg["EMAIL_DEMO_MODE"]:
-        return ("DEMO MODE - no email server set up, so each code is shown on the sign-in screen\n"
-                "and printed in this window. To email real codes, fill in SMTP_* in backend/.env")
-    return ("BLOCKED - no SMTP_HOST and EMAIL_DEMO_MODE=false, so nobody can sign up or sign in\n"
-            "-> fill in the SMTP_* settings in backend/.env, or set EMAIL_DEMO_MODE=true")
+        return ("DEMO MODE (EMAIL_DEMO_MODE=true) - codes are shown on the sign-in screen, not emailed\n"
+                "-> to email them instead, fill in the SMTP_* settings in backend/.env")
+    return ("NOT SET UP - SMTP_HOST is empty, so no codes can be emailed and nobody can sign up or sign in\n"
+            "-> fill in the SMTP_* settings in backend/.env, then restart the backend")
 
 
 def _ai_status(cfg) -> str:
